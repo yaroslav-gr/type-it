@@ -1,11 +1,11 @@
 <template>
   <main class="w-50 mx-auto d-block">
 
-    <input
+    <input 
       v-model="userValue"
-      @blur="makeInputFocused"
+      
       @input="compareTexts(userValue)"
-      class="sr-only" type="text" name="" id="" autofocus>
+      class="sr-only" type="text" name="" id="user-input">
 
 
     <b-container fluid>
@@ -17,7 +17,20 @@
           class="letter"
           >{{item}}</span>
         </b-col>
-        <b-col class="border"><span>Скорость печати: {{(lettersInMinute && lettersInMinute !== Infinity) ? lettersInMinute.toFixed(0) : '0'}} символов в минуту</span></b-col>
+        
+        <b-col class="">
+          <div>
+            Скорость печати: <span>{{(lettersInMinute && lettersInMinute !== Infinity) ?  lettersInMinute.toFixed(0) : '0'}} символов в минуту</span>
+          </div>
+
+          <button
+          @click="onButtonClick">
+            начать тест
+          </button>
+        </b-col>
+
+        
+    
       </b-row>
     </b-container>
   </main>
@@ -46,11 +59,16 @@ export default {
   },
 
   methods: {
-    makeInputFocused(event) {
-      event.target.focus();
+    setFocusOnInput() {
+      const input = document.querySelector('#user-input');
+      input.focus();
     },
 
-    colorizeSpan(index) {
+    onButtonClick() {
+      this.setFocusOnInput();
+    },
+
+    setColorSpan(index) {
       console.log(typeof index);
       if (typeof index == 'number') {
         this.textSpans[index].style.background = 'green';
@@ -61,10 +79,10 @@ export default {
 
     compareTexts() {
       if (this.userValue[this.userValue.length - 1] === this.getText[this.lastIndexSymbol]) {
-        this.colorizeSpan(this.lastIndexSymbol);
+        this.setColorSpan(this.lastIndexSymbol);
         this.lastIndexSymbol++;
       } else {
-        this.colorizeSpan(null);
+        this.setColorSpan(null);
       }
       this.updateTime();
     },
