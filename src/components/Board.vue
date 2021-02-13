@@ -2,8 +2,9 @@
   <main class="w-50 mx-auto d-block">
 
     <input 
+      @blur="focusedInput"
       v-model="userValue"
-      @input="compareTexts(userValue)"
+      @input="inputChangeHandler"
       class="sr-only" type="text" name="" ref="user-input">
 
 
@@ -52,7 +53,7 @@ import {mapGetters} from 'vuex'
 export default {
   name: 'Board',
 
-  data:  function() {
+  data() {
     return {
       userValue: '',
       textSpans: [],
@@ -60,6 +61,7 @@ export default {
       oldTime: 0,
       totalTime: 0,
       lettersInMinute: 0,
+      totalScore: 0,
       isStarted: false,
       idSetInterval: null,
     }
@@ -67,26 +69,27 @@ export default {
 
   mounted() {
     this.textSpans = this.$refs.symbol;
-    console.log(this.textSpans)
   },
 
   methods: {
-    setFocusOnInput(arg) {
-      const input = this.$refs['user-input'];
-      arg ? input.blur() : input.focus();
+
+    focusedInput(event) {
+      event.target.focus()
     },
 
     onButtonClickStart() {
-      this.setFocusOnInput(this.isStarted);
+      this.testIsStart();
       this.startInterval();
-
+    
       this.isStarted = !this.isStarted;
     },
 
     onButtonClickEnd() {
-      this.setFocusOnInput(this.isStarted)
+      this.saveScore();
+      console.log(this.totalScore)
       this.isStarted = !this.isStarted;
-      clearInterval(this.idSetInterval)
+      this.userValue = '';
+      clearInterval(this.idSetInterval);
       this.$refs.startButton.blur();
     },
 
@@ -99,14 +102,44 @@ export default {
       }
     },
 
-    compareTexts() {
-      if (this.userValue[this.userValue.length - 1] === this.getText[this.lastIndexSymbol]) {
-        this.setColorSpan(this.lastIndexSymbol);
-        this.lastIndexSymbol++;
-      } else {
-        this.setColorSpan(null);
+    inputChangeHandler() {
+      this.compareTexts(this.isTextComlited);
+      console.log(this.userValue)
+    },
+
+    /***
+     * ф-я сравнивает символы из исходного текста по индексу последнего совпашего символа и каждое последнее значение из инпута, при удовлетворении условия увеличивает на шаг индекс последнего слвпавшего индекса и добавдяет span зеленый цвет, и в красный при неудовл. Обновляет счетчик времени.
+     */
+    compareTexts(arg) {
+        if (this.userValue[this.userValue.length - 1] === this.getText[this.lastIndexSymbol]) {
+          this.setColorSpan(this.lastIndexSymbol);
+          this.lastIndexSymbol++;
+          this.testIsEnd(arg);
+        } else {
+          this.setColorSpan();
+        }
+    },
+
+    savePrevScore() {
+
+    },
+
+    testIsStart() {
+      this.$refs['user-input'].focus();
+      this.textSpans.forEach(span => {
+        span.style.background = '';
+      });
+    },
+
+    testIsEnd(arg) {
+      if (arg) {
+        this.saveScore();
+        console.log(this.totalScore)
+        clearInterval(this.idSetInterval);
+        this.lastIndexSymbol = 0;
+        this.userValue = '';
+        this.isStarted = false;
       }
-      this.updateTime();
     },
 
     updateTime() {
@@ -116,7 +149,6 @@ export default {
         const difference = ((timeNow - this.oldTime) / 1000);
         this.totalTime += difference;
         this.oldTime = timeNow;
-        console.log(this.oldTime, difference, this.totalTime);
       } else {
         this.oldTime = timeNow;
       }  
@@ -132,12 +164,20 @@ export default {
       this.idSetInterval = setInterval(() => {
         this.updateTime();
         this.lettersInMinute = (60 / this.totalTime * this.lastIndexSymbol);
-      }, 1000);
+      }, 500);
+    },
+
+    saveScore() {
+    this.totalScore = this.lettersInMinute;
     },
   }, 
 
   computed: {
     ...mapGetters(['getText']),
+
+    isTextComlited () {
+      return this.lastIndexSymbol === this.getText.length - 1;
+    }
   },
 }
 </script>
