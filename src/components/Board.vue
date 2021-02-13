@@ -3,9 +3,8 @@
 
     <input 
       v-model="userValue"
-      
       @input="compareTexts(userValue)"
-      class="sr-only" type="text" name="" id="user-input">
+      class="sr-only" type="text" name="" ref="user-input">
 
 
     <b-container fluid>
@@ -14,7 +13,7 @@
           <span 
           v-for="(item, index) of getText"
           :key="index+item"
-          class="letter"
+          ref="symbol"
           >{{item}}</span>
         </b-col>
         
@@ -24,12 +23,23 @@
           </div>
 
           <button
-          @click="onButtonClick">
+          v-if="isStarted"
+          @click="onButtonClickEnd"
+          ref="startButton">
+            закончить тест
+          </button>
+
+          <button
+          v-else
+          @click="onButtonClickStart"
+          ref="endButton">
             начать тест
           </button>
         </b-col>
 
-        
+
+
+        <b-input></b-input>
     
       </b-row>
     </b-container>
@@ -50,22 +60,34 @@ export default {
       oldTime: 0,
       totalTime: 0,
       lettersInMinute: 0,
+      isStarted: false,
+      idSetInterval: null,
     }
   },
 
   mounted() {
-    this.textSpans = document.querySelectorAll('.letter');
-    this.startInterval()
+    this.textSpans = this.$refs.symbol;
+    console.log(this.textSpans)
   },
 
   methods: {
-    setFocusOnInput() {
-      const input = document.querySelector('#user-input');
-      input.focus();
+    setFocusOnInput(arg) {
+      const input = this.$refs['user-input'];
+      arg ? input.blur() : input.focus();
     },
 
-    onButtonClick() {
-      this.setFocusOnInput();
+    onButtonClickStart() {
+      this.setFocusOnInput(this.isStarted);
+      this.startInterval();
+
+      this.isStarted = !this.isStarted;
+    },
+
+    onButtonClickEnd() {
+      this.setFocusOnInput(this.isStarted)
+      this.isStarted = !this.isStarted;
+      clearInterval(this.idSetInterval)
+      this.$refs.startButton.blur();
     },
 
     setColorSpan(index) {
@@ -100,14 +122,14 @@ export default {
       }  
     },
 
-     getLettersInOneMinute () {
+    getLettersInOneMinute () {
       if (this.totalTime !== 0) {
         return (60 / this.totalTime * this.lastIndexSymbol).toFixed(0);
       };
     },
 
-     startInterval: function () {
-      setInterval(() => {
+    startInterval: function () {
+      this.idSetInterval = setInterval(() => {
         this.updateTime();
         this.lettersInMinute = (60 / this.totalTime * this.lastIndexSymbol);
       }, 1000);
