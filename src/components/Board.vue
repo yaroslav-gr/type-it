@@ -29,25 +29,32 @@
           v-if="isStarted"
           @click="onButtonClickEnd"
           ref="startButton">
-            закончить тест
+            STOP
           </button>
 
           <button
           v-else
           @click="onButtonClickStart"
           ref="endButton">
-            начать тест
+            START
+          </button>
+
+          <button
+          @click="resetScore"
+          ref="resetButton">
+            Reset score
           </button>
         </b-col>
       </b-row>
 
       <b-row class="">
         <b-col class="col-9">
-          <b-progress :value=getAccuracy.toFixed(0) class="mb-2"></b-progress>
+          <p>Progress...</p>
+          <b-progress :value=getProgress.toFixed(0) class="mb-2"></b-progress>
         </b-col>
         <b-col>
           <p>
-            Меткость: {{getAccuracy.toFixed(0)}} %
+            Меткость: {{getAccruracy}} %
           </p>
         </b-col>
 
@@ -57,7 +64,7 @@
 </template>
 
 <script>
-import {mapGetters} from 'vuex'
+import {mapGetters, mapActions} from 'vuex'
 
 export default {
   name: 'Board',
@@ -82,6 +89,7 @@ export default {
   },
 
   methods: {
+    ...mapActions(['updateScore']),
 
     focusedInput(event) {
       event.target.focus()
@@ -90,18 +98,16 @@ export default {
     onButtonClickStart() {
       this.testIsStart();
       this.startInterval();
-    
       this.isStarted = !this.isStarted;
     },
 
     onButtonClickEnd() {
-      this.savePrevScore();
+      this.saveScore();
       this.testIsEnd(true);    
       this.$refs.startButton.blur();
     },
 
     setColorSpan(index) {
-      console.log(typeof index);
       if (typeof index == 'number') {
         this.textSpans[index].style.background = 'green';
       } else {
@@ -111,8 +117,6 @@ export default {
 
     inputChangeHandler() {
       this.compareTexts(this.isTextComlited);
-      console.log(this.userValue);
-      console.log(this.lastIndexSymbol, this.userValue, this.isStarted)
     },
 
     /***
@@ -133,6 +137,9 @@ export default {
     },
 
     testIsStart() {
+      this.match = 0;
+      this.lastIndexSymbol = 0;
+      this.userValue = '';
       this.$refs['user-input'].removeAttribute('disabled');
       this.$refs['user-input'].focus();
       this.textSpans.forEach(span => {
@@ -142,10 +149,8 @@ export default {
 
     testIsEnd(arg) {
       if (arg) {
-        this.savePrevScore();
+        localStorage.setItem('score', this.lettersInMinute)
         clearInterval(this.idSetInterval);
-        this.lastIndexSymbol = 0;
-        this.userValue = '';
         this.isStarted = false;
         this.oldTime = 0;
         this.totalTime = 0;
@@ -178,9 +183,15 @@ export default {
       }, 500);
     },
 
-    savePrevScore() {
+    saveScore() {
     this.totalScore = this.lettersInMinute;
     localStorage.setItem('score', this.totalScore);
+    this.updateScore(this.totalScore);
+    },
+
+    resetScore() {
+      localStorage.setItem('score', 0);
+      this.updateScore(0);
     },
   }, 
 
@@ -191,8 +202,18 @@ export default {
       return this.lastIndexSymbol === this.getText.length - 1;
     },
 
-    getAccuracy() {
+    getProgress() {
       return this.match / this.getText.length * 100;
+    },
+
+    getAccruracy() {
+      const accruacy = this.match / this.userValue.length * 100;
+      if (typeof accruacy === 'number' && accruacy === accruacy) {
+        return accruacy.toFixed(0)
+      }
+      else {
+        return 0;
+      }
     }
   },
 }
