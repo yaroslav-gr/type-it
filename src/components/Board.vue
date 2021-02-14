@@ -163,7 +163,7 @@ export default {
 
         this.items.push({
           Try: this.items.length + 1,
-          ['Print Speed']: this.lettersInMinute.toFixed(0),
+          ['Print Speed']: (this.lettersInMinute > 0 && this.lettersInMinute !== Infinity) ? this.lettersInMinute.toFixed(0) : 0,
           Accuracy: this.getAccuracy,
         });
 
@@ -196,7 +196,7 @@ export default {
       this.idSetInterval = setInterval(() => {
         this.updateTime();
         this.lettersInMinute = (60 / this.totalTime * this.lastIndexSymbol);
-      }, 500);
+      }, 100);
     },
 
     saveScore() {

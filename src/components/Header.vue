@@ -1,5 +1,5 @@
 <template>
-  <h1 v-if="getScore">
+  <h1 v-if="getScore > 0">
     Hi again! Your last scorre: <span>{{(getScore *1).toFixed(0)}}</span>. 
     Let's try again?
   </h1>
