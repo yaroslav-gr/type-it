@@ -21,11 +21,26 @@
         <b-col class="">
           <div>
             <p>
-              Скорость печати: <span>{{(lettersInMinute && lettersInMinute !== Infinity) ?  lettersInMinute.toFixed(0) : '0'}} символов в минуту</span>
+              Скорость печати: <span>{{(lettersInMinute && lettersInMinute !== Infinity) ?  lettersInMinute.toFixed(0) : '0'}} зн./ мин</span>
             </p>
           </div>
+          <div>
+            <p>
+            Меткость: {{getAccuracy}} %
+          </p>
+          </div>
+         
+        </b-col>
+      </b-row>
 
-          <button
+      <b-row class="">
+        <b-col class="col-9">
+          <p>Progress...</p>
+          <b-progress :value=getProgress.toFixed(0) class="mb-2"></b-progress>
+        </b-col>
+        <b-col>
+          
+           <button
           v-if="isStarted"
           @click="onButtonClickEnd"
           ref="startButton">
@@ -45,20 +60,13 @@
             Reset score
           </button>
         </b-col>
-      </b-row>
+        </b-row>
 
-      <b-row class="">
-        <b-col class="col-9">
-          <p>Progress...</p>
-          <b-progress :value=getProgress.toFixed(0) class="mb-2"></b-progress>
-        </b-col>
-        <b-col>
-          <p>
-            Меткость: {{getAccruracy}} %
-          </p>
-        </b-col>
-
-      </b-row>
+        <b-row>
+          <div class="w-100">
+            <b-table striped hover :items="items"></b-table>
+          </div>
+        </b-row>
     </b-container>
   </main>
 </template>
@@ -81,6 +89,7 @@ export default {
       isStarted: false,
       idSetInterval: null,
       match: 0,
+      items: [],
     }
   },
 
@@ -151,6 +160,13 @@ export default {
       if (arg) {
         localStorage.setItem('score', this.lettersInMinute)
         clearInterval(this.idSetInterval);
+
+        this.items.push({
+          Try: this.items.length + 1,
+          ['Print Speed']: this.lettersInMinute.toFixed(0),
+          Accuracy: this.getAccuracy,
+        });
+
         this.isStarted = false;
         this.oldTime = 0;
         this.totalTime = 0;
@@ -206,10 +222,10 @@ export default {
       return this.match / this.getText.length * 100;
     },
 
-    getAccruracy() {
-      const accruacy = this.match / this.userValue.length * 100;
-      if (typeof accruacy === 'number' && accruacy === accruacy) {
-        return accruacy.toFixed(0)
+    getAccuracy() {
+      const accuracy = this.match / this.userValue.length * 100;
+      if (typeof accuracy === 'number' && accuracy === accuracy) {
+        return accuracy.toFixed(0)
       }
       else {
         return 0;
