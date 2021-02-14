@@ -85,11 +85,8 @@ export default {
     },
 
     onButtonClickEnd() {
-      this.saveScore();
-      console.log(this.totalScore)
-      this.isStarted = !this.isStarted;
-      this.userValue = '';
-      clearInterval(this.idSetInterval);
+      this.savePrevScore();
+      this.testIsEnd(true);    
       this.$refs.startButton.blur();
     },
 
@@ -104,11 +101,15 @@ export default {
 
     inputChangeHandler() {
       this.compareTexts(this.isTextComlited);
-      console.log(this.userValue)
+      console.log(this.userValue);
+      console.log(this.lastIndexSymbol, this.userValue, this.isStarted)
     },
 
     /***
-     * ф-я сравнивает символы из исходного текста по индексу последнего совпашего символа и каждое последнее значение из инпута, при удовлетворении условия увеличивает на шаг индекс последнего слвпавшего индекса и добавдяет span зеленый цвет, и в красный при неудовл. Обновляет счетчик времени.
+     * ф-я сравнивает символы из исходного текста по индексу последнего 
+     * совпашего символа и каждое последнее значение из инпута, при удовлетворении 
+     * условия увеличивает на шаг индекс последнего слвпавшего индекса и добавдяет 
+     * span зеленый цвет, и в красный при неудовл. Обновляет счетчик времени.
      */
     compareTexts(arg) {
         if (this.userValue[this.userValue.length - 1] === this.getText[this.lastIndexSymbol]) {
@@ -120,11 +121,8 @@ export default {
         }
     },
 
-    savePrevScore() {
-
-    },
-
     testIsStart() {
+      this.$refs['user-input'].removeAttribute('disabled');
       this.$refs['user-input'].focus();
       this.textSpans.forEach(span => {
         span.style.background = '';
@@ -133,12 +131,15 @@ export default {
 
     testIsEnd(arg) {
       if (arg) {
-        this.saveScore();
+        this.savePrevScore();
         console.log(this.totalScore)
         clearInterval(this.idSetInterval);
         this.lastIndexSymbol = 0;
         this.userValue = '';
         this.isStarted = false;
+        this.oldTime = 0;
+        this.totalTime = 0;
+        this.$refs['user-input'].setAttribute('disabled', true)
       }
     },
 
@@ -167,7 +168,7 @@ export default {
       }, 500);
     },
 
-    saveScore() {
+    savePrevScore() {
     this.totalScore = this.lettersInMinute;
     },
   }, 
