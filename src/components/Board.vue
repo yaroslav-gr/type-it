@@ -9,8 +9,8 @@
 
 
     <b-container fluid>
-      <b-row class="border rounded">
-        <b-col cols="9" class="border p-3">
+      <b-row class="mb-5">
+        <b-col cols="9" class="p-3 text">
           <span 
           v-for="(item, index) of getText"
           :key="index+item"
@@ -21,24 +21,24 @@
         <b-col class="">
           <div>
             <p>
-              Скорость печати: <span>{{(lettersInMinute && lettersInMinute !== Infinity) ?  lettersInMinute.toFixed(0) : '0'}} зн./ мин</span>
+              Speed: <span class="total">{{(lettersInMinute && lettersInMinute !== Infinity) ?  lettersInMinute.toFixed(0) : '0'}} LPM</span>
             </p>
           </div>
           <div>
             <p>
-            Меткость: {{getAccuracy}} %
+            Accuracy: <span class="total">{{getAccuracy}} %</span>
           </p>
           </div>
          
         </b-col>
       </b-row>
 
-      <b-row class="">
+      <b-row class="mb-5">
         <b-col class="col-9">
           <p>Progress...</p>
           <b-progress :value=getProgress.toFixed(0) class="mb-2"></b-progress>
         </b-col>
-        <b-col>
+        <b-col class="d-flex flex-column justify-content-between button-container">
           
            <button
           v-if="isStarted"
@@ -163,8 +163,8 @@ export default {
 
         this.items.push({
           Try: this.items.length + 1,
-          ['Print Speed']: (this.lettersInMinute > 0 && this.lettersInMinute !== Infinity) ? this.lettersInMinute.toFixed(0) : 0,
-          Accuracy: this.getAccuracy,
+          ['Print Speed, LPM']: (this.lettersInMinute > 0 && this.lettersInMinute !== Infinity) ? this.lettersInMinute.toFixed(0) : 0,
+          ['Accuracy, %']: this.getAccuracy,
         });
 
         this.isStarted = false;
@@ -234,3 +234,35 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+  main {
+    padding: 1rem;
+    background: linear-gradient(47deg, rgba(177,246,212,1) 0%, rgba(208,255,246,0.5130427170868348) 100%);
+
+    -webkit-box-shadow: 20px 20px 3px 0px rgba(57,76,122,1);
+    -moz-box-shadow: 20px 20px 3px 0px rgba(57,76,122,1);
+    box-shadow: 20px 20px 3px 0px rgba(57,76,122,1);
+  }
+
+  .text {
+    background: rgba(255, 255, 255, 0.781);
+    border: #b0b0b1 1px solid;
+
+    font-size: 25px;
+  }
+
+  button {
+    border: #b0b0b1 1px solid;
+    padding: 0.5rem 0rem;
+    margin-bottom: 1rem;
+  }
+
+  .total {
+    font-size: 20px;
+  }
+
+  .button-container {
+    margin-right: -15px;
+  }
+</style>
