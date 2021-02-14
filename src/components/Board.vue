@@ -11,7 +11,7 @@
     <b-container fluid>
       <b-row class="mb-5">
         <b-col cols="9" class="p-3 text">
-          <span 
+          <span class="cell"
           v-for="(item, index) of getText"
           :key="index+item"
           ref="symbol"
@@ -93,12 +93,13 @@ export default {
     }
   },
 
-  mounted() {
+  async mounted() {
+    await this.fetchText();
     this.textSpans = this.$refs.symbol;
   },
 
   methods: {
-    ...mapActions(['updateScore']),
+    ...mapActions(['updateScore','fetchText']),
 
     focusedInput(event) {
       event.target.focus()
@@ -118,9 +119,9 @@ export default {
 
     setColorSpan(index) {
       if (typeof index == 'number') {
-        this.textSpans[index].style.background = 'green';
+        this.textSpans[index].style.background = '#4fd06b';
       } else {
-        this.textSpans[this.lastIndexSymbol].style.background = 'red';
+        this.textSpans[this.lastIndexSymbol].style.background = '#ff9c9cd4';
       }
     },
 
@@ -264,5 +265,9 @@ export default {
 
   .button-container {
     margin-right: -15px;
+  }
+
+  .cell {
+    letter-spacing: 0.5px;
   }
 </style>

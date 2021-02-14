@@ -14,7 +14,7 @@ export default {
   name: 'App',
   components: {
     Header, Board
-  }
+  },
 }
 </script>
 
@@ -33,7 +33,7 @@ export default {
 }
 
 body {
-  height: 100vh;
+  min-height: 100vh;
   background: linear-gradient(47deg, rgba(106,255,138,1) 0%, rgba(69,252,216,0.5) 100%);
 }
 
