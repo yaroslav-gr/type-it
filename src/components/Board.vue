@@ -20,7 +20,9 @@
         
         <b-col class="">
           <div>
-            Скорость печати: <span>{{(lettersInMinute && lettersInMinute !== Infinity) ?  lettersInMinute.toFixed(0) : '0'}} символов в минуту</span>
+            <p>
+              Скорость печати: <span>{{(lettersInMinute && lettersInMinute !== Infinity) ?  lettersInMinute.toFixed(0) : '0'}} символов в минуту</span>
+            </p>
           </div>
 
           <button
@@ -37,11 +39,18 @@
             начать тест
           </button>
         </b-col>
+      </b-row>
 
+      <b-row class="">
+        <b-col class="col-9">
+          <b-progress :value=getAccuracy.toFixed(0) class="mb-2"></b-progress>
+        </b-col>
+        <b-col>
+          <p>
+            Меткость: {{getAccuracy.toFixed(0)}} %
+          </p>
+        </b-col>
 
-
-        <b-input></b-input>
-    
       </b-row>
     </b-container>
   </main>
@@ -64,6 +73,7 @@ export default {
       totalScore: 0,
       isStarted: false,
       idSetInterval: null,
+      match: 0,
     }
   },
 
@@ -115,6 +125,7 @@ export default {
         if (this.userValue[this.userValue.length - 1] === this.getText[this.lastIndexSymbol]) {
           this.setColorSpan(this.lastIndexSymbol);
           this.lastIndexSymbol++;
+          this.match = this.lastIndexSymbol;
           this.testIsEnd(arg);
         } else {
           this.setColorSpan();
@@ -132,7 +143,6 @@ export default {
     testIsEnd(arg) {
       if (arg) {
         this.savePrevScore();
-        console.log(this.totalScore)
         clearInterval(this.idSetInterval);
         this.lastIndexSymbol = 0;
         this.userValue = '';
@@ -170,14 +180,19 @@ export default {
 
     savePrevScore() {
     this.totalScore = this.lettersInMinute;
+    localStorage.setItem('score', this.totalScore);
     },
   }, 
 
   computed: {
     ...mapGetters(['getText']),
 
-    isTextComlited () {
+    isTextComlited() {
       return this.lastIndexSymbol === this.getText.length - 1;
+    },
+
+    getAccuracy() {
+      return this.match / this.getText.length * 100;
     }
   },
 }
