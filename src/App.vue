@@ -13,7 +13,7 @@ import Board from './components/Board';
 export default {
   name: 'App',
   components: {
-    Header, Board
+    Header, Board,
   },
 }
 </script>

@@ -1,12 +1,10 @@
 <template>
   <main class="w-50 mx-auto d-block">
-
     <input 
       @blur="focusedInput"
       v-model="userValue"
       @input="inputChangeHandler"
       class="sr-only" type="text" name="" ref="user-input">
-
 
     <b-container fluid>
       <b-row class="mb-5">
@@ -26,10 +24,9 @@
           </div>
           <div>
             <p>
-            Accuracy: <span class="total">{{getAccuracy}} %</span>
-          </p>
+              Accuracy: <span class="total">{{getAccuracy}} %</span>
+            </p>
           </div>
-         
         </b-col>
       </b-row>
 
@@ -38,9 +35,9 @@
           <p>Progress...</p>
           <b-progress :value=getProgress.toFixed(0) class="mb-2"></b-progress>
         </b-col>
+
         <b-col class="d-flex flex-column justify-content-between button-container">
-          
-           <button
+          <button
           v-if="isStarted"
           @click="onButtonClickEnd"
           ref="startButton">
@@ -57,7 +54,7 @@
           <button
           @click="resetScore"
           ref="resetButton">
-            Reset score
+            Reset last score
           </button>
         </b-col>
         </b-row>
@@ -72,7 +69,7 @@
 </template>
 
 <script>
-import {mapGetters, mapActions} from 'vuex'
+import {mapGetters, mapActions} from 'vuex';
 
 export default {
   name: 'Board',
@@ -93,30 +90,43 @@ export default {
     }
   },
 
-  async mounted() {
-    await this.fetchText();
-    this.textSpans = this.$refs.symbol;
+  mounted() {
+    this.fetchText()
+      .then(() => this.textSpans = this.$refs.symbol);
   },
 
   methods: {
     ...mapActions(['updateScore','fetchText']),
 
+    /**
+    * Колбэк на input, слушаем blur -> ставим обратно фокус на input
+    */
     focusedInput(event) {
-      event.target.focus()
+      event.target.focus();
     },
 
+    /**
+    * Хендлер на кнопке Старт; вызывет ф-ю начала теста, запускает интервал; пернключает флаг, объявляя, что тест запущен.
+    */
     onButtonClickStart() {
-      this.testIsStart();
+      this.startTest();
       this.startInterval();
       this.isStarted = !this.isStarted;
     },
 
+    /**
+    * Хендлер на кнопке Завершить; вызывет ф-ю сохраниения очков, завершения теста с аргументом true; убирает фокус на кнопке Старт.
+    */
     onButtonClickEnd() {
       this.saveScore();
-      this.testIsEnd(true);    
+      this.endTest(true);    
       this.$refs.startButton.blur();
     },
 
+    /**
+    * Добавляет нужный цвет backgroung span в коллекции по индексу.
+    * @param {nymber} index - вызывается без пареметра в случае, когда проверка символов не прошла.
+    */
     setColorSpan(index) {
       if (typeof index == 'number') {
         this.textSpans[index].style.background = '#4fd06b';
@@ -125,6 +135,9 @@ export default {
       }
     },
 
+    /**
+    * Колбэк на input, слушает change.
+    */
     inputChangeHandler() {
       this.compareTexts(this.isTextComlited);
     },
@@ -132,21 +145,25 @@ export default {
     /***
      * ф-я сравнивает символы из исходного текста по индексу последнего 
      * совпашего символа и каждое последнее значение из инпута, при удовлетворении 
-     * условия увеличивает на шаг индекс последнего слвпавшего индекса и добавдяет 
-     * span зеленый цвет, и в красный при неудовл. Обновляет счетчик времени.
+     * условия увеличивает на шаг индекс последнего совпавшего индекса и вызывает ф-ю окрашивания span; обновляет счетчик времени.
+     * @param {Boolien} arg - аргумент true нужет только чтобы вызвать ф-ю завершения теста в случае, когда сравнивниваем
+     * последний символ в тексте и условие успеха удовлетворяется.
      */
     compareTexts(arg) {
         if (this.userValue[this.userValue.length - 1] === this.getText[this.lastIndexSymbol]) {
           this.setColorSpan(this.lastIndexSymbol);
           this.lastIndexSymbol++;
           this.match = this.lastIndexSymbol;
-          this.testIsEnd(arg);
+          this.endTest(arg);
         } else {
           this.setColorSpan();
         }
     },
 
-    testIsStart() {
+    /**
+    * Ф-я сбразывает свойства в data; очищает input и делает его активным; сбрасывает background у всех span.
+    */ 
+    startTest() {
       this.match = 0;
       this.lastIndexSymbol = 0;
       this.userValue = '';
@@ -157,9 +174,15 @@ export default {
       });
     },
 
-    testIsEnd(arg) {
+    /**
+    * Обновляет значение в localStorage, удаляет интервал, добавляет в массив объект с итогами оконченного теста для отображения в таблице;
+    * сбрасывает значения в data; добывляет полю input disabled.
+    * @param {Boolien} arg - в случае нажатия на кнопку "завершить" вызовется с аргументом true; в случае, когда проходят тест до конца, "флаг"
+    * меняется с false на true, тогда ф-я и отрабатывает.
+    */
+    endTest(arg) {
       if (arg) {
-        localStorage.setItem('score', this.lettersInMinute)
+        localStorage.setItem('score', this.lettersInMinute);
         clearInterval(this.idSetInterval);
 
         this.items.push({
@@ -171,10 +194,13 @@ export default {
         this.isStarted = false;
         this.oldTime = 0;
         this.totalTime = 0;
-        this.$refs['user-input'].setAttribute('disabled', true)
+        this.$refs['user-input'].setAttribute('disabled', true);
       }
     },
 
+    /**
+    * Устанавливает начальное значение oldTime, если нет, или обновляет его; рассчитывает общее время totalTime
+    */
     updateTime() {
       const timeNow = Date.now();
 
@@ -187,12 +213,9 @@ export default {
       }  
     },
 
-    getLettersInOneMinute () {
-      if (this.totalTime !== 0) {
-        return (60 / this.totalTime * this.lastIndexSymbol).toFixed(0);
-      };
-    },
-
+    /**
+    * Запускает ф-ю обновления времени и рассчитывает количество символов в минуту каждую 1/10 секунды
+    */ 
     startInterval: function () {
       this.idSetInterval = setInterval(() => {
         this.updateTime();
@@ -200,12 +223,18 @@ export default {
       }, 100);
     },
 
+    /**
+    * Сохраняет значение очков в localStorage и обновляет в store
+    */
     saveScore() {
     this.totalScore = this.lettersInMinute;
     localStorage.setItem('score', this.totalScore);
     this.updateScore(this.totalScore);
     },
-
+    
+    /**
+    * Сбрасывает значение в localStorage и в store
+    */
     resetScore() {
       localStorage.setItem('score', 0);
       this.updateScore(0);
@@ -226,12 +255,12 @@ export default {
     getAccuracy() {
       const accuracy = this.match / this.userValue.length * 100;
       if (typeof accuracy === 'number' && accuracy === accuracy) {
-        return accuracy.toFixed(0)
+        return accuracy.toFixed(0);
       }
       else {
         return 0;
       }
-    }
+    },
   },
 }
 </script>
@@ -248,7 +277,7 @@ export default {
 
   .text {
     background: rgba(255, 255, 255, 0.781);
-    border: #b0b0b1 1px solid;
+    border: rgba(57,76,122,1) 1px solid;
 
     font-size: 25px;
   }
