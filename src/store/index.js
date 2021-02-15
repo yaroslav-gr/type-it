@@ -31,11 +31,11 @@ export default new Vuex.Store({
      * Посылаем запрос, передаем response в mutations
      */
     async fetchText({commit}) {
-      const response = await fetch(`https://fish-text.ru/get?format=json`)
+      const response = await fetch(`https://fish-text.ru/get?format=json&number=2`)
           .then((response) => {
             return response.json();
-          });
-      commit('setText', response.text);
+          }).then((result) => result = result.text.replace(/ {1,}/g," "));
+      commit('setText', response);
     },
   },
 

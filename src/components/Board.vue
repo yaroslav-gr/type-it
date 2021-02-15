@@ -168,15 +168,14 @@ export default {
       this.lastIndexSymbol = 0;
       this.userValue = '';
       this.$refs['user-input'].removeAttribute('disabled');
-      this.$refs['user-input'].focus();
+       this.$refs['user-input'].focus();
       this.textSpans.forEach(span => {
         span.style.background = '';
       });
     },
 
     /**
-    * Обновляет значение в localStorage, удаляет интервал, добавляет в массив объект с итогами оконченного теста для отображения в таблице;
-    * сбрасывает значения в data; добывляет полю input disabled.
+    * Обновляет значение в localStorage, удаляет интервал; сбрасывает значения в data; добывляет полю input disabled.
     * @param {Boolien} arg - в случае нажатия на кнопку "завершить" вызовется с аргументом true; в случае, когда проходят тест до конца, "флаг"
     * меняется с false на true, тогда ф-я и отрабатывает.
     */
@@ -184,17 +183,30 @@ export default {
       if (arg) {
         localStorage.setItem('score', this.lettersInMinute);
         clearInterval(this.idSetInterval);
-
-        this.items.push({
-          Try: this.items.length + 1,
-          ['Print Speed, LPM']: (this.lettersInMinute > 0 && this.lettersInMinute !== Infinity) ? this.lettersInMinute.toFixed(0) : 0,
-          ['Accuracy, %']: this.getAccuracy,
-        });
-
+        this.addNewScoreInTable();
         this.isStarted = false;
         this.oldTime = 0;
         this.totalTime = 0;
         this.$refs['user-input'].setAttribute('disabled', true);
+      }
+    },
+
+    /**
+    * Добавляет в массив объект с итогами оконченного теста для отображения в таблице.
+    * Ограничивает длинну массива с итогами теста, позволяе вывести только 5 последних попыток.
+    */
+    addNewScoreInTable() {
+      if (this.items.length > 4) {
+        this.items.shift();
+        this.items.push({
+          ['Print Speed, LPM']: (this.lettersInMinute > 0 && this.lettersInMinute !== Infinity) ? this.lettersInMinute.toFixed(0) : 0,
+          ['Accuracy, %']: this.getAccuracy,
+        });
+      } else {
+        this.items.push({
+          ['Print Speed, LPM']: (this.lettersInMinute > 0 && this.lettersInMinute !== Infinity) ? this.lettersInMinute.toFixed(0) : 0,
+          ['Accuracy, %']: this.getAccuracy,
+        });
       }
     },
 
@@ -267,6 +279,7 @@ export default {
 
 <style scoped>
   main {
+    min-width: 90%;
     padding: 1rem;
     background: linear-gradient(47deg, rgba(177,246,212,1) 0%, rgba(208,255,246,0.5130427170868348) 100%);
 
