@@ -96,7 +96,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['updateScore','fetchText']),
+    ...mapActions(['fetchText']),
 
     /**
     * Колбэк на input, слушаем blur -> ставим обратно фокус на input
@@ -241,15 +241,15 @@ export default {
     saveScore() {
     this.totalScore = this.lettersInMinute;
     localStorage.setItem('score', this.totalScore);
-    this.updateScore(this.totalScore);
     },
     
     /**
-    * Сбрасывает значение в localStorage и в store
+    * Удаляет результаты теста, если тест не запущен.
     */
     resetScore() {
-      localStorage.setItem('score', 0);
-      this.updateScore(0);
+      if (!this.isStarted) {
+      this.items = [];
+      }
     },
   }, 
 
